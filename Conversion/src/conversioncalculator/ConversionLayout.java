@@ -18,7 +18,7 @@ import javax.swing.SwingConstants;
 
 /*
  * TODO finish error handling
- * TODO TextField updates on typing
+ * TODO TextField updates on typing?
  * TODO Only accept positive numbers
  */
 
@@ -80,7 +80,7 @@ public class ConversionLayout {
 
 	}// end layout constructor
 
-	// ActionListener to set the value of the from unit field based on user
+	// ActionListener to set the value of the userInput1 field based on user
 	// selection
 	public void addFromSelection() {
 		fromSelection.addActionListener(new ActionListener() {
@@ -125,7 +125,7 @@ public class ConversionLayout {
 		});
 	}
 
-	// ActionListener to set the value of the to field based on user selection
+	// ActionListener to set the value of the userInput2 field based on user selection
 	public void addToSelection() {
 		toSelection.addActionListener(new ActionListener() {
 
@@ -199,7 +199,7 @@ public class ConversionLayout {
 		tsp.setValue(userInput);
 		tsp.getValue();
 	}
-	//class for setting user input values on either JTextBox
+	//class for setting user input values on either JTextField
 	private class UserEntries implements ActionListener {
 		
 
