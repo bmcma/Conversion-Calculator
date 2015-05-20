@@ -11,19 +11,19 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+
 /**
- * @author Brian McMahon
- * Conversion Layout class to develop the Swing components and implement Event Listeners
+ * @author Brian McMahon Conversion Layout class to develop the Swing components
+ *         and implement Event Listeners
  */
 
 /*
- * TODO finish error handling
- * TODO TextField updates on typing?
- * TODO Only accept positive numbers
+ * TODO finish error handling TODO TextField updates on typing?  TODO Add weight and volume radio buttons and
+ * switch JComboBoxes - Add relevant classes
  */
 
 public class ConversionLayout {
-	NumberFormat df = new DecimalFormat("#.##");
+	NumberFormat df = new DecimalFormat("#.#####");
 	JComboBox<?> fromSelection;
 	JComboBox<?> toSelection;
 	JTextField userInput1;
@@ -70,10 +70,10 @@ public class ConversionLayout {
 		topLabel = new JLabel("Please enter your selections below:");
 		topPanel = new JPanel();
 		topPanel.add(topLabel);
-		
+
 		addFromSelection();
 		addToSelection();
-		
+
 		UserEntries entry = new UserEntries();
 		userInput1.addActionListener(entry);
 		userInput2.addActionListener(entry);
@@ -88,7 +88,8 @@ public class ConversionLayout {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String selection = (String) fromSelection.getSelectedItem();
-				//check the unit user selects from JComboBox and set the value to unit1
+				// check the unit user selects from JComboBox and set the value
+				// to unit1
 				switch (selection) {
 				case "litre":
 					unit1 = "litre";
@@ -118,21 +119,22 @@ public class ConversionLayout {
 					unit1 = "quart";
 					break;
 				}
-
-				//System.out.println(unit1);
+				// System.out.println(unit1);
 
 			}
 		});
 	}
 
-	// ActionListener to set the value of the userInput2 field based on user selection
+	// ActionListener to set the value of the userInput2 field based on user
+	// selection
 	public void addToSelection() {
 		toSelection.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String selection = (String) toSelection.getSelectedItem();
-				//check the unit user selects from JComboBox and set the value to unit2
+				// check the unit user selects from JComboBox and set the value
+				// to unit2
 				switch (selection) {
 				case "litre":
 					unit2 = "litre";
@@ -163,13 +165,13 @@ public class ConversionLayout {
 					break;
 				}
 
-				//System.out.println(unit2);
+				// System.out.println(unit2);
 			}
-			
+
 		});
 	}
 
-	//sets the values for userInput to each conversion unit
+	// sets the values for userInput to each conversion unit
 	public void setValues(double userInput) {
 
 		ml.setValue(userInput);
@@ -199,146 +201,155 @@ public class ConversionLayout {
 		tsp.setValue(userInput);
 		tsp.getValue();
 	}
-	//class for setting user input values on either JTextField
+
+	// class for setting user input values on either JTextField
 	private class UserEntries implements ActionListener {
-		
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			//if userInput1 triggers ActionEvent we check for unit1 value and convert to unit2 value
+			// if userInput1 triggers ActionEvent we check for unit1 value and
+			// convert to unit2 value
 			if (e.getSource() == userInput1) {
 				String value = userInput1.getText();
-				//ensure entry is a numerical value
+				// ensure entry is a numerical value
 				try {
 					amountValue = Double.parseDouble(value);
+					if (amountValue < 0) {
+						throw new NumberFormatException();
+					}
 				} catch (NumberFormatException ex) {
 					JOptionPane.showMessageDialog(userInput1,
 							"Please enter a numeric value to convert.");
 				}
-				//sets the userInput value to the unit1
+				// sets the userInput value to the unit1
 				setValues(amountValue);
-				try{
-				switch (unit1) {
-				case "ml":
-					result = String.valueOf(ml.convertTo(unit2));
-					userInput2.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "cup":
-					result = String.valueOf(cup.convertTo(unit2));
-					userInput2.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "gallon":
-					result = String.valueOf(gallon.convertTo(unit2));
-					userInput2.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "litre":
-					result = String.valueOf(litre.convertTo(unit2));
-					userInput2.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "oz":
-					result = String.valueOf(oz.convertTo(unit2));
-					userInput2.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "pint":
-					result = String.valueOf(pint.convertTo(unit2));
-					userInput2.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "quart":
-					result = String.valueOf(quart.convertTo(unit2));
-					userInput2.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "tbsp":
-					result = String.valueOf(tbsp.convertTo(unit2));
-					userInput2.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "tsp":
-					result = String.valueOf(tsp.convertTo(unit2));
-					userInput2.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				}
-				//catches exception is user does not select conversion units
+				try {
+					switch (unit1) {
+					case "ml":
+						result = String.valueOf(ml.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "cup":
+						result = String.valueOf(cup.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "gallon":
+						result = String.valueOf(gallon.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "litre":
+						result = String.valueOf(litre.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "oz":
+						result = String.valueOf(oz.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "pint":
+						result = String.valueOf(pint.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "quart":
+						result = String.valueOf(quart.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "tbsp":
+						result = String.valueOf(tbsp.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "tsp":
+						result = String.valueOf(tsp.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					}
+					// catches exception is user does not select conversion
+					// units
 				} catch (NullPointerException ex) {
 					fromSelection.setSelectedItem("ml");
 					JOptionPane.showMessageDialog(topPanel,
 							"Please make unit selections.");
 				}
-			//if userInput2 triggers ActionEvent we check for unit2 value and convert to unit1 value
+				// if userInput2 triggers ActionEvent we check for unit2 value
+				// and convert to unit1 value
 			} else if (e.getSource() == userInput2) {
-				userInput1.setText("");
 				String value = userInput2.getText();
 				try {
 					amountValue = Double.parseDouble(value);
+					if (amountValue < 0) {
+						throw new NumberFormatException();
+					}
 				} catch (NumberFormatException ex) {
-					JOptionPane.showMessageDialog(userInput2,
-							"Please enter a numeric value to convert.");
+					JOptionPane
+							.showMessageDialog(userInput2,
+									"Please enter a positive numeric value to convert.");
 				}
-				//sets the userInput value to the units
+				// sets the userInput value to the units
 				setValues(amountValue);
-				try{
-				switch (unit2) {
-				case "ml":
-					result = String.valueOf(ml.convertTo(unit1));
-					userInput1.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "cup":
-					result = String.valueOf(cup.convertTo(unit1));
-					userInput1.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "gallon":
-					result = String.valueOf(gallon.convertTo(unit1));
-					userInput1.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "litre":
-					result = String.valueOf(litre.convertTo(unit1));
-					userInput1.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "oz":
-					result = String.valueOf(oz.convertTo(unit1));
-					userInput1.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "pint":
-					result = String.valueOf(pint.convertTo(unit1));
-					userInput1.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "quart":
-					result = String.valueOf(quart.convertTo(unit1));
-					userInput1.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "tbsp":
-					result = String.valueOf(tbsp.convertTo(unit1));
-					userInput1.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				case "tsp":
-					result = String.valueOf(tsp.convertTo(unit1));
-					userInput1.setText(df.format(Double
-							.parseDouble(result)));
-					break;
-				}
-				//catches exception is user does not select conversion units
+				try {
+					switch (unit2) {
+					case "ml":
+						result = String.valueOf(ml.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "cup":
+						result = String.valueOf(cup.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "gallon":
+						result = String.valueOf(gallon.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "litre":
+						result = String.valueOf(litre.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "oz":
+						result = String.valueOf(oz.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "pint":
+						result = String.valueOf(pint.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "quart":
+						result = String.valueOf(quart.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "tbsp":
+						result = String.valueOf(tbsp.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "tsp":
+						result = String.valueOf(tsp.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					}
+					// catches exception is user does not select conversion
+					// units
 				} catch (NullPointerException ex) {
 					JOptionPane.showMessageDialog(topPanel,
 							"Please make unit selections.");
 				}
 			}
 		}
-	}//end UserEntries
+	}// end UserEntries
 
-
-}//end ConversionLayout
+}// end ConversionLayout
