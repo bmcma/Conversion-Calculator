@@ -17,7 +17,7 @@ public abstract class Conversion {
 	
 	public abstract double getValue();
 
-	public abstract double convertTo(String value);
+	public abstract double convertTo(String unit);
 	
 
 }

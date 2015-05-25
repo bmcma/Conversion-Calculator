@@ -27,23 +27,23 @@ public class ConvertFromCup extends Conversion{
 	@Override
 	public double convertTo(String unit) {
 		
-		if (unit.equalsIgnoreCase("litre")){
+		if (unit.equals("litre")){
 			result = (value/4.2268);
 		}else if (unit.equals("cup")){
 			result = value;
-		}else if (unit.equalsIgnoreCase("pint")){
+		}else if (unit.equals("pint")){
 			result = (value * 0.50000);
-		}else if (unit.equalsIgnoreCase("ml")){
+		}else if (unit.equals("ml")){
 			result = (value/0.0042268);			
-		}else if (unit.equalsIgnoreCase("oz")){
+		}else if (unit.equals("oz")){
 			result = (value * 8.0);
-		}else if (unit.equalsIgnoreCase("tbsp")){
+		}else if (unit.equals("tbsp")){
 			result = (value * 16.000);
-		}else if (unit.equalsIgnoreCase("tsp")){
+		}else if (unit.equals("tsp")){
 			result = (value * 48.000);
-		}else if (unit.equalsIgnoreCase("gallon")){
+		}else if (unit.equals("gallon")){
 			result = (value * 0.062500);
-		}else if (unit.equalsIgnoreCase("quart")){
+		}else if (unit.equals("quart")){
 			result = (value * 0.25000);
 		}
 		return result;

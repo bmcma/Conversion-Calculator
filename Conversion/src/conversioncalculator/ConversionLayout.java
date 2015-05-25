@@ -3,14 +3,22 @@ package conversioncalculator;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 /**
  * @author Brian McMahon Conversion Layout class to develop the Swing components
@@ -18,34 +26,46 @@ import javax.swing.SwingConstants;
  */
 
 /*
- * TODO finish error handling TODO TextField updates on typing?  TODO Add weight and volume radio buttons and
- * switch JComboBoxes - Add relevant classes
+ * TODO TextField updates on typing? TODO Conversion updates when new unit is
+ * selected. ie don't have to hit enter again
+ * TODO add weight values to switch statement and move to another method and call from here passing in parameters.
  */
 
 public class ConversionLayout {
 	NumberFormat df = new DecimalFormat("#.#####");
-	JComboBox<?> fromSelection;
-	JComboBox<?> toSelection;
-	JTextField userInput1;
-	JTextField userInput2;
-	JLabel topLabel;
-	JLabel equals;
-	JPanel topPanel;
-	JPanel calcInput;
-	String[] fromUnits;
-	String unit1;
-	String unit2;
-	String result;
-	double amountValue;
-	Conversion ml = new ConvertFromMillilitre();
-	Conversion cup = new ConvertFromCup();
-	Conversion gallon = new ConvertFromGallon();
-	Conversion litre = new ConvertFromLitre();
-	Conversion oz = new ConvertFromOz();
-	Conversion pint = new ConvertFromPint();
-	Conversion quart = new ConvertFromQuart();
-	Conversion tbsp = new ConvertFromTbsp();
-	Conversion tsp = new ConvertFromTsp();
+	private JRadioButton volume = new JRadioButton("volume");
+	private JRadioButton weight = new JRadioButton("weight");
+	private JComboBox<String> selection1 = new JComboBox<String>();
+	private JComboBox<String> selection2 = new JComboBox<String>();
+	private DefaultComboBoxModel<String> unitSet1 = new DefaultComboBoxModel<String>();
+	private DefaultComboBoxModel<String> unitSet2 = new DefaultComboBoxModel<String>();
+	private JTextField userInput1;
+	private JTextField userInput2;
+	private JLabel topLabel;
+	private JLabel equals;
+	private JPanel topPanel;
+	private JPanel calcInput;
+	private JPanel radioPanel;
+	private String[] units = { "ml", "litre", "oz", "cup", "pint", "tbsp",
+			"tsp", "gallon", "quart" };
+	private String[] units1 = { "g", "kg", "oz", "lb" };
+	private String unit1;
+	private String unit2;
+	private String result;
+	private double amountValue;
+	private Conversion ml = new ConvertFromMillilitre();
+	private Conversion cup = new ConvertFromCup();
+	private Conversion gallon = new ConvertFromGallon();
+	private Conversion litre = new ConvertFromLitre();
+	private Conversion oz = new ConvertFromOz();
+	private Conversion pint = new ConvertFromPint();
+	private Conversion quart = new ConvertFromQuart();
+	private Conversion tbsp = new ConvertFromTbsp();
+	private Conversion tsp = new ConvertFromTsp();
+	private Conversion g = new ConvertFromGram();
+	private Conversion kg = new ConvertFromKilogram();
+	private Conversion ozWeight = new ConvertFromOzWeight();
+	private Conversion lb = new ConvertFromPound();
 
 	public ConversionLayout() {
 		equals = new JLabel("=");
@@ -53,26 +73,64 @@ public class ConversionLayout {
 		userInput1 = new JTextField();
 		userInput2 = new JTextField();
 
-		fromUnits = new String[] { "ml", "litre", "oz", "cup", "pint", "tbsp",
-				"tsp", "gallon", "quart" };
-		fromSelection = new JComboBox<String>(fromUnits);
+		for (int i = 0; i < units.length; i++) {
+			unitSet1.addElement(units[i]);
+			unitSet2.addElement(units[i]);
+		}
 
-		toSelection = new JComboBox<String>(fromUnits);
+		selection1.setModel(unitSet1);
+		selection2.setModel(unitSet2);
+		ButtonGroup group = new ButtonGroup();
+		group.add(volume);
+		group.add(weight);
+		volume.setSelected(true);
+		radioPanel = new JPanel(new GridLayout(0, 2));
+		radioPanel.add(volume);
+		radioPanel.add(weight);
+
+		volume.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				unitSet1.removeAllElements();
+				unitSet2.removeAllElements();
+				for (int i = 0; i < units.length; i++) {
+					unitSet1.addElement(units[i]);
+					unitSet2.addElement(units[i]);
+				}
+			}
+
+		});
+
+		weight.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				unitSet1.removeAllElements();
+				unitSet2.removeAllElements();
+				for (int i = 0; i < units1.length; i++) {
+					unitSet1.addElement(units1[i]);
+					unitSet2.addElement(units1[i]);
+				}
+			}
+
+		});
+
+		setDefaultValues("ml", "ml");
 
 		calcInput = new JPanel(new GridLayout(1, 5));
 
-		calcInput.add(fromSelection);
+		calcInput.add(selection1);
 		calcInput.add(userInput1);
 		calcInput.add(equals);
-		calcInput.add(toSelection);
+		calcInput.add(selection2);
 		calcInput.add(userInput2);
 
 		topLabel = new JLabel("Please enter your selections below:");
 		topPanel = new JPanel();
 		topPanel.add(topLabel);
 
-		addFromSelection();
-		addToSelection();
+		unitSelections();
 
 		UserEntries entry = new UserEntries();
 		userInput1.addActionListener(entry);
@@ -80,100 +138,41 @@ public class ConversionLayout {
 
 	}// end layout constructor
 
-	// ActionListener to set the value of the userInput1 field based on user
-	// selection
-	public void addFromSelection() {
-		fromSelection.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String selection = (String) fromSelection.getSelectedItem();
-				// check the unit user selects from JComboBox and set the value
-				// to unit1
-				switch (selection) {
-				case "litre":
-					unit1 = "litre";
-					break;
-				case "oz":
-					unit1 = "oz";
-					break;
-				case "cup":
-					unit1 = "cup";
-					break;
-				case "pint":
-					unit1 = "pint";
-					break;
-				case "ml":
-					unit1 = "ml";
-					break;
-				case "tbsp":
-					unit1 = "tbsp";
-					break;
-				case "tsp":
-					unit1 = "tsp";
-					break;
-				case "gallon":
-					unit1 = "gallon";
-					break;
-				case "quart":
-					unit1 = "quart";
-					break;
-				}
-				// System.out.println(unit1);
-
-			}
-		});
+	private void setDefaultValues(String val1, String val2) {
+		if (unit1 == null) {
+			this.unit1 = val1;
+			this.unit2 = val2;
+		}
 	}
 
-	// ActionListener to set the value of the userInput2 field based on user
-	// selection
-	public void addToSelection() {
-		toSelection.addActionListener(new ActionListener() {
+	// ItemListener to set the value of the unit1 and unit2 fields based on user
+	// selections
+	private void unitSelections() {
+		selection1.addItemListener(new ItemListener() {
 
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				String selection = (String) toSelection.getSelectedItem();
-				// check the unit user selects from JComboBox and set the value
-				// to unit2
-				switch (selection) {
-				case "litre":
-					unit2 = "litre";
-					break;
-				case "oz":
-					unit2 = "oz";
-					break;
-				case "cup":
-					unit2 = "cup";
-					break;
-				case "pint":
-					unit2 = "pint";
-					break;
-				case "ml":
-					unit2 = "ml";
-					break;
-				case "tbsp":
-					unit2 = "tbsp";
-					break;
-				case "tsp":
-					unit2 = "tsp";
-					break;
-				case "gallon":
-					unit2 = "gallon";
-					break;
-				case "quart":
-					unit2 = "quart";
-					break;
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					String selection = selection1.getSelectedItem().toString();
+					unit1 = selection;
 				}
-
-				// System.out.println(unit2);
 			}
+		});
 
+		selection2.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					String selection = selection2.getSelectedItem().toString();
+					unit2 = selection;
+				}
+			}
 		});
 	}
 
 	// sets the values for userInput to each conversion unit
-	public void setValues(double userInput) {
-
+	private void setValues(double userInput) {
 		ml.setValue(userInput);
 		ml.getValue();
 
@@ -200,30 +199,47 @@ public class ConversionLayout {
 
 		tsp.setValue(userInput);
 		tsp.getValue();
+
+		tsp.setValue(userInput);
+		tsp.getValue();
+
+		g.setValue(userInput);
+		g.getValue();
+
+		kg.setValue(userInput);
+		kg.getValue();
+
+		ozWeight.setValue(userInput);
+		ozWeight.getValue();
+
+		lb.setValue(userInput);
+		lb.getValue();
 	}
+	
 
 	// class for setting user input values on either JTextField
 	private class UserEntries implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// if userInput1 triggers ActionEvent we check for unit1 value and
-			// convert to unit2 value
-			if (e.getSource() == userInput1) {
-				String value = userInput1.getText();
-				// ensure entry is a numerical value
-				try {
-					amountValue = Double.parseDouble(value);
-					if (amountValue < 0) {
-						throw new NumberFormatException();
+			//if the volume JRadioButton is selected we will run the switch on volume units.
+			if (volume.isSelected()) {
+				// if userInput1 triggers ActionEvent we check for unit1 value and
+				// convert to unit2 value
+				if (e.getSource() == userInput1) {
+					String value = userInput1.getText();
+					// ensure entry is a numerical value
+					try {
+						amountValue = Double.parseDouble(value);
+						if (amountValue < 0) {
+							throw new NumberFormatException();
+						}
+					} catch (NumberFormatException ex) {
+						JOptionPane.showMessageDialog(userInput1,
+								"Please enter a numeric value to convert.");
 					}
-				} catch (NumberFormatException ex) {
-					JOptionPane.showMessageDialog(userInput1,
-							"Please enter a numeric value to convert.");
-				}
-				// sets the userInput value to the unit1
-				setValues(amountValue);
-				try {
+					// sets the userInput value to the unit1
+					setValues(amountValue);
 					switch (unit1) {
 					case "ml":
 						result = String.valueOf(ml.convertTo(unit2));
@@ -270,31 +286,26 @@ public class ConversionLayout {
 						userInput2
 								.setText(df.format(Double.parseDouble(result)));
 						break;
+
+					}//end switch
+
+					// if userInput2 triggers ActionEvent we check for unit2
+					// value
+					// and convert to unit1 value
+				} else if (e.getSource() == userInput2) {
+					String value = userInput2.getText();
+					try {
+						amountValue = Double.parseDouble(value);
+						if (amountValue < 0) {
+							throw new NumberFormatException();
+						}
+					} catch (NumberFormatException ex) {
+						JOptionPane
+								.showMessageDialog(userInput2,
+										"Please enter a positive numeric value to convert.");
 					}
-					// catches exception is user does not select conversion
-					// units
-				} catch (NullPointerException ex) {
-					fromSelection.setSelectedItem("ml");
-					JOptionPane.showMessageDialog(topPanel,
-							"Please make unit selections.");
-				}
-				// if userInput2 triggers ActionEvent we check for unit2 value
-				// and convert to unit1 value
-			} else if (e.getSource() == userInput2) {
-				String value = userInput2.getText();
-				try {
-					amountValue = Double.parseDouble(value);
-					if (amountValue < 0) {
-						throw new NumberFormatException();
-					}
-				} catch (NumberFormatException ex) {
-					JOptionPane
-							.showMessageDialog(userInput2,
-									"Please enter a positive numeric value to convert.");
-				}
-				// sets the userInput value to the units
-				setValues(amountValue);
-				try {
+					// sets the userInput value to the units
+					setValues(amountValue);
 					switch (unit2) {
 					case "ml":
 						result = String.valueOf(ml.convertTo(unit1));
@@ -341,15 +352,110 @@ public class ConversionLayout {
 						userInput1
 								.setText(df.format(Double.parseDouble(result)));
 						break;
+					}//end switch
+				}//end inner if/else
+			//if the weight JRadioButton is selected we will run the switch on weight units.	
+			} else if (weight.isSelected()) {
+				// if userInput1 triggers ActionEvent we check for unit1
+				// value and convert to unit2 value
+				if (e.getSource() == userInput1) {
+					String value = userInput1.getText();
+					// ensure entry is a numerical value
+					try {
+						amountValue = Double.parseDouble(value);
+						if (amountValue < 0) {
+							throw new NumberFormatException();
+						}
+					} catch (NumberFormatException ex) {
+						JOptionPane.showMessageDialog(userInput1,
+								"Please enter a numeric value to convert.");
 					}
-					// catches exception is user does not select conversion
-					// units
-				} catch (NullPointerException ex) {
-					JOptionPane.showMessageDialog(topPanel,
-							"Please make unit selections.");
-				}
-			}
-		}
+					// sets the userInput value to the unit1
+					setValues(amountValue);
+					switch (unit1) {
+					case "g":
+						result = String.valueOf(g.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "kg":
+						result = String.valueOf(kg.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "oz":
+						result = String.valueOf(ozWeight.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "lb":
+						result = String.valueOf(lb.convertTo(unit2));
+						userInput2
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					}//end switch
+					// if userInput2 triggers ActionEvent we check for unit2
+					// value and convert to unit1 value
+				} else if (e.getSource() == userInput2) {
+					String value = userInput2.getText();
+					try {
+						amountValue = Double.parseDouble(value);
+						if (amountValue < 0) {
+							throw new NumberFormatException();
+						}
+					} catch (NumberFormatException ex) {
+						JOptionPane
+								.showMessageDialog(userInput2,
+										"Please enter a positive numeric value to convert.");
+					}
+					// sets the userInput value to the units
+					setValues(amountValue);
+					switch (unit2) {
+					case "g":
+						result = String.valueOf(g.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "kg":
+						result = String.valueOf(kg.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "oz":
+						result = String.valueOf(ozWeight.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					case "lb":
+						result = String.valueOf(lb.convertTo(unit1));
+						userInput1
+								.setText(df.format(Double.parseDouble(result)));
+						break;
+					}//end switch
+				}//end inner if/else
+			}//end outer if/else for JRadioButton selections
+		}//end ActionPerformed
 	}// end UserEntries
+
+	private void buildGui() {
+		JFrame frame = new JFrame("Conversion Calculator");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(new GridLayout(4, 1, 0, 5));
+		frame.getContentPane().add(topPanel);
+		frame.getContentPane().add(radioPanel);
+		frame.getContentPane().add(calcInput);
+		frame.setSize(400, 150);
+		frame.setResizable(false);
+		frame.setVisible(true);
+	}
+
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				ConversionLayout run = new ConversionLayout();
+				run.buildGui();
+			}
+		});
+	}//end main
 
 }// end ConversionLayout
