@@ -7,8 +7,8 @@ package conversioncalculator;
 
 public abstract class Conversion {
 
-	double value;
-	double result;
+	protected double value;
+	protected double result;
 
 
 	public Conversion(){}

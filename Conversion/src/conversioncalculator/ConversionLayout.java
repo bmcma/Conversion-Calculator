@@ -28,7 +28,6 @@ import javax.swing.SwingUtilities;
 /*
  * TODO TextField updates on typing? TODO Conversion updates when new unit is
  * selected. ie don't have to hit enter again
- * TODO add weight values to switch statement and move to another method and call from here passing in parameters.
  */
 
 public class ConversionLayout {
@@ -53,19 +52,10 @@ public class ConversionLayout {
 	private String unit2;
 	private String result;
 	private double amountValue;
-	private Conversion ml = new ConvertFromMillilitre();
-	private Conversion cup = new ConvertFromCup();
-	private Conversion gallon = new ConvertFromGallon();
-	private Conversion litre = new ConvertFromLitre();
-	private Conversion oz = new ConvertFromOz();
-	private Conversion pint = new ConvertFromPint();
-	private Conversion quart = new ConvertFromQuart();
-	private Conversion tbsp = new ConvertFromTbsp();
-	private Conversion tsp = new ConvertFromTsp();
-	private Conversion g = new ConvertFromGram();
-	private Conversion kg = new ConvertFromKilogram();
-	private Conversion ozWeight = new ConvertFromOzWeight();
-	private Conversion lb = new ConvertFromPound();
+	VolumeConversionFactory volumeFactory = new VolumeConversionFactory();
+	Conversion volumeUnits;
+	WeightConversionFactory weightFactory = new WeightConversionFactory();
+	Conversion weightUnits;
 
 	public ConversionLayout() {
 		equals = new JLabel("=");
@@ -83,11 +73,13 @@ public class ConversionLayout {
 		ButtonGroup group = new ButtonGroup();
 		group.add(volume);
 		group.add(weight);
-		volume.setSelected(true);
+		volume.setSelected(true);// sets default selection to volume
 		radioPanel = new JPanel(new GridLayout(0, 2));
 		radioPanel.add(volume);
 		radioPanel.add(weight);
 
+		// adds the units for volume calculations when the volume JRadioButton
+		// is selected
 		volume.addActionListener(new ActionListener() {
 
 			@Override
@@ -102,6 +94,8 @@ public class ConversionLayout {
 
 		});
 
+		// adds the units for weight calculations when the weight JRadioButton
+		// is selected
 		weight.addActionListener(new ActionListener() {
 
 			@Override
@@ -138,6 +132,7 @@ public class ConversionLayout {
 
 	}// end layout constructor
 
+	// sets the default selection on startup
 	private void setDefaultValues(String val1, String val2) {
 		if (unit1 == null) {
 			this.unit1 = val1;
@@ -171,62 +166,29 @@ public class ConversionLayout {
 		});
 	}
 
-	// sets the values for userInput to each conversion unit
-	private void setValues(double userInput) {
-		ml.setValue(userInput);
-		ml.getValue();
-
-		cup.setValue(userInput);
-		cup.getValue();
-
-		gallon.setValue(userInput);
-		gallon.getValue();
-
-		litre.setValue(userInput);
-		litre.getValue();
-
-		oz.setValue(userInput);
-		oz.getValue();
-
-		pint.setValue(userInput);
-		pint.getValue();
-
-		quart.setValue(userInput);
-		quart.getValue();
-
-		tbsp.setValue(userInput);
-		tbsp.getValue();
-
-		tsp.setValue(userInput);
-		tsp.getValue();
-
-		tsp.setValue(userInput);
-		tsp.getValue();
-
-		g.setValue(userInput);
-		g.getValue();
-
-		kg.setValue(userInput);
-		kg.getValue();
-
-		ozWeight.setValue(userInput);
-		ozWeight.getValue();
-
-		lb.setValue(userInput);
-		lb.getValue();
+	// calls the relevant calculation based on unit selection and user input
+	// values
+	public void calculate(String result, Conversion converter, String unit,
+			JTextField field) {
+		result = String.valueOf(converter.convertTo(unit));// calls calculation
+		field.setText(df.format(Double.parseDouble(result)));// sets the result
+																// in JTextField
 	}
-	
 
 	// class for setting user input values on either JTextField
 	private class UserEntries implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			//if the volume JRadioButton is selected we will run the switch on volume units.
+			// if the volume JRadioButton is selected we will run the switch on
+			// volume units.
 			if (volume.isSelected()) {
-				// if userInput1 triggers ActionEvent we check for unit1 value and
+
+				// if userInput1 triggers ActionEvent we check for unit1 value
+				// and
 				// convert to unit2 value
 				if (e.getSource() == userInput1) {
+					volumeUnits = volumeFactory.getVolumeConversion(unit1);
 					String value = userInput1.getText();
 					// ensure entry is a numerical value
 					try {
@@ -238,61 +200,48 @@ public class ConversionLayout {
 						JOptionPane.showMessageDialog(userInput1,
 								"Please enter a numeric value to convert.");
 					}
-					// sets the userInput value to the unit1
-					setValues(amountValue);
+					// sets the userInput value to the relevant volume unit for
+					// unit1
+					volumeUnits.setValue(amountValue);
+					volumeUnits.getValue();
+					// checks for selected unit value and calls the calculate
+					// method on the relevant unit
 					switch (unit1) {
 					case "ml":
-						result = String.valueOf(ml.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit2, userInput2);
 						break;
 					case "cup":
-						result = String.valueOf(cup.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit2, userInput2);
 						break;
 					case "gallon":
-						result = String.valueOf(gallon.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit2, userInput2);
 						break;
 					case "litre":
-						result = String.valueOf(litre.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit2, userInput2);
 						break;
 					case "oz":
-						result = String.valueOf(oz.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit2, userInput2);
 						break;
 					case "pint":
-						result = String.valueOf(pint.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit2, userInput2);
 						break;
 					case "quart":
-						result = String.valueOf(quart.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit2, userInput2);
 						break;
 					case "tbsp":
-						result = String.valueOf(tbsp.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit2, userInput2);
 						break;
 					case "tsp":
-						result = String.valueOf(tsp.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit2, userInput2);
 						break;
 
-					}//end switch
+					}// end switch
 
 					// if userInput2 triggers ActionEvent we check for unit2
 					// value
 					// and convert to unit1 value
 				} else if (e.getSource() == userInput2) {
+					volumeUnits = volumeFactory.getVolumeConversion(unit2);
 					String value = userInput2.getText();
 					try {
 						amountValue = Double.parseDouble(value);
@@ -304,61 +253,49 @@ public class ConversionLayout {
 								.showMessageDialog(userInput2,
 										"Please enter a positive numeric value to convert.");
 					}
-					// sets the userInput value to the units
-					setValues(amountValue);
+					// sets the userInput value to the relevant volume unit for
+					// unit2
+					volumeUnits.setValue(amountValue);
+					volumeUnits.getValue();
+					// checks for selected unit value and calls the calculate
+					// method on the relevant unit
 					switch (unit2) {
 					case "ml":
-						result = String.valueOf(ml.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit1, userInput1);
 						break;
 					case "cup":
-						result = String.valueOf(cup.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit1, userInput1);
 						break;
 					case "gallon":
-						result = String.valueOf(gallon.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit1, userInput1);
 						break;
 					case "litre":
-						result = String.valueOf(litre.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit1, userInput1);
 						break;
 					case "oz":
-						result = String.valueOf(oz.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit1, userInput1);
 						break;
 					case "pint":
-						result = String.valueOf(pint.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit1, userInput1);
 						break;
 					case "quart":
-						result = String.valueOf(quart.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit1, userInput1);
 						break;
 					case "tbsp":
-						result = String.valueOf(tbsp.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit1, userInput1);
 						break;
 					case "tsp":
-						result = String.valueOf(tsp.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, volumeUnits, unit1, userInput1);
 						break;
-					}//end switch
-				}//end inner if/else
-			//if the weight JRadioButton is selected we will run the switch on weight units.	
+					}// end switch
+				}// end inner if/else
+				// if the weight JRadioButton is selected we will run the switch
+				// on weight units.
 			} else if (weight.isSelected()) {
 				// if userInput1 triggers ActionEvent we check for unit1
 				// value and convert to unit2 value
 				if (e.getSource() == userInput1) {
+					weightUnits = weightFactory.getWeightConversion(unit1);
 					String value = userInput1.getText();
 					// ensure entry is a numerical value
 					try {
@@ -370,33 +307,30 @@ public class ConversionLayout {
 						JOptionPane.showMessageDialog(userInput1,
 								"Please enter a numeric value to convert.");
 					}
-					// sets the userInput value to the unit1
-					setValues(amountValue);
+					// sets the userInput value to the relevant weight unit for
+					// unit1
+					weightUnits.setValue(amountValue);
+					weightUnits.getValue();
+					// checks for selected unit value and calls the calculate
+					// method on the relevant unit
 					switch (unit1) {
 					case "g":
-						result = String.valueOf(g.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, weightUnits, unit2, userInput2);
 						break;
 					case "kg":
-						result = String.valueOf(kg.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, weightUnits, unit2, userInput2);
 						break;
 					case "oz":
-						result = String.valueOf(ozWeight.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, weightUnits, unit2, userInput2);
 						break;
 					case "lb":
-						result = String.valueOf(lb.convertTo(unit2));
-						userInput2
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, weightUnits, unit2, userInput2);
 						break;
-					}//end switch
-					// if userInput2 triggers ActionEvent we check for unit2
-					// value and convert to unit1 value
+					}// end switch
+						// if userInput2 triggers ActionEvent we check for unit2
+						// value and convert to unit1 value
 				} else if (e.getSource() == userInput2) {
+					weightUnits = weightFactory.getWeightConversion(unit2);
 					String value = userInput2.getText();
 					try {
 						amountValue = Double.parseDouble(value);
@@ -408,33 +342,29 @@ public class ConversionLayout {
 								.showMessageDialog(userInput2,
 										"Please enter a positive numeric value to convert.");
 					}
-					// sets the userInput value to the units
-					setValues(amountValue);
+					// sets the userInput value to the relevant weight unit for
+					// unit2
+					weightUnits.setValue(amountValue);
+					weightUnits.getValue();
+					// checks for selected unit value and calls the calculate
+					// method on the relevant unit
 					switch (unit2) {
 					case "g":
-						result = String.valueOf(g.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, weightUnits, unit1, userInput1);
 						break;
 					case "kg":
-						result = String.valueOf(kg.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, weightUnits, unit1, userInput1);
 						break;
 					case "oz":
-						result = String.valueOf(ozWeight.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, weightUnits, unit1, userInput1);
 						break;
 					case "lb":
-						result = String.valueOf(lb.convertTo(unit1));
-						userInput1
-								.setText(df.format(Double.parseDouble(result)));
+						calculate(result, weightUnits, unit1, userInput1);
 						break;
-					}//end switch
-				}//end inner if/else
-			}//end outer if/else for JRadioButton selections
-		}//end ActionPerformed
+					}// end switch
+				}// end inner if/else
+			}// end outer if/else for JRadioButton selections
+		}// end ActionPerformed
 	}// end UserEntries
 
 	private void buildGui() {
@@ -450,12 +380,12 @@ public class ConversionLayout {
 	}
 
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
 				ConversionLayout run = new ConversionLayout();
 				run.buildGui();
 			}
 		});
-	}//end main
+	}// end main
 
 }// end ConversionLayout
